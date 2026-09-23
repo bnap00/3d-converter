@@ -1,0 +1,279 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="{{url}}">
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="author" content="bnap.dev">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="3D Converter">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="{{url}}">
+  <meta property="og:title" content="{{ogTitle}}">
+  <meta property="og:description" content="{{ogDescription}}">
+  <meta property="og:image" content="{{ogImage}}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ogImageAlt}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ogTitle}}">
+  <meta name="twitter:description" content="{{ogDescription}}">
+  <meta name="twitter:image" content="{{ogImage}}">
+  <meta name="twitter:image:alt" content="{{ogImageAlt}}">
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="preload" href="/fonts/geist-latin-wght-v5.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/styles.css">
+
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three@0.186.0/three.module.js" } }
+  </script>
+  <script type="module" src="/assets/app.js"></script>
+
+  <script type="application/ld+json">
+{{jsonld}}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#converter">Skip to converter</a>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="wordmark" href="/" aria-label="3D Converter home">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-cube"/></svg>
+        <span>3D Converter</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">{{eyebrow}}</p>
+        <h1>{{h1}}</h1>
+        <p class="lede">{{lede}}</p>
+      </div>
+
+      <div class="converter" id="converter" data-has-items="false">
+        <div class="converter-head">
+          <p class="io"><span>STEP</span><span>IGES</span><span class="io-to">to</span><span class="io-out">STL</span></p>
+          <p class="local">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-lock-simple"/></svg>Runs on your device
+          </p>
+        </div>
+
+        <label class="dropzone" id="dropzone" for="file-input">
+          <svg class="icon dz-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-file-arrow-up"/></svg>
+          <span class="dz-title">{{dropTitle}}</span>
+          <span class="dz-help">.step, .stp, .iges, .igs. Add as many as you like.</span>
+          <span class="btn btn-primary dz-button">Choose files</span>
+          <input id="file-input" type="file" multiple accept=".step,.stp,.iges,.igs" class="visually-hidden">
+        </label>
+
+        <noscript><p class="notice">The converter needs JavaScript. Please enable it to convert files.</p></noscript>
+        <p class="notice" id="notice" role="status" hidden></p>
+
+        <div class="settings">
+          <fieldset class="segmented">
+            <legend>Mesh quality</legend>
+            <div class="segmented-options">
+              <label><input type="radio" name="quality" value="draft"><span>Draft</span></label>
+              <label><input type="radio" name="quality" value="standard" checked><span>Standard</span></label>
+              <label><input type="radio" name="quality" value="fine"><span>Fine</span></label>
+            </div>
+            <p class="hint" id="quality-hint">0.05 mm tolerance, good for most prints</p>
+          </fieldset>
+
+          <label class="switch">
+            <input type="checkbox" id="split-bodies" role="switch">
+            <span class="switch-track" aria-hidden="true"></span>
+            <span class="switch-text">One STL per body<small>For assemblies and multi-body parts</small></span>
+          </label>
+        </div>
+
+        <div class="reapply" id="reapply" hidden>
+          <span>Settings changed.</span>
+          <button type="button" class="btn btn-ghost btn-sm" id="reapply-btn">Convert again</button>
+        </div>
+
+        <div class="engine" id="engine" hidden>
+          <span class="shimmer" aria-hidden="true"></span>
+          <span>Loading the converter engine (7.6 MB, first time only)</span>
+        </div>
+
+        <ul class="queue" id="queue" aria-live="polite"></ul>
+
+        <div class="queue-bar" id="queue-bar" hidden>
+          <p class="queue-summary" id="queue-summary"></p>
+          <div class="queue-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="clear-btn">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-trash"/></svg>Clear
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="download-all" disabled>
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-file-zip"/></svg>Download all
+            </button>
+          </div>
+        </div>
+
+        <p class="ready-to-print" id="ready-to-print" hidden>
+          Ready to print?
+          <a href="https://mnm3d.com/products/custom-3d-print?utm_source=3dconverter.bnap.dev&amp;utm_medium=referral&amp;utm_campaign=converter" target="_blank" rel="noopener">Get instant quote<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-arrow-up-right"/></svg></a>
+        </p>
+      </div>
+    </section>
+
+    <section class="wrap features" id="features" aria-labelledby="features-title">
+      <h2 id="features-title" class="reveal">Built for people who print</h2>
+      <div class="bento">
+        <article class="cell cell-private reveal">
+          <svg class="icon cell-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-lock-simple"/></svg>
+          <h3>Your files never leave your computer</h3>
+          <p>Conversion runs inside this browser tab using OpenCascade compiled to WebAssembly. Nothing is uploaded, so it is safe for client and NDA work.</p>
+        </article>
+        <article class="cell cell-quality reveal">
+          <svg class="icon cell-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-sliders-horizontal"/></svg>
+          <h3>Pick the mesh quality</h3>
+          <p>Draft, Standard or Fine. A tighter tolerance gives smoother curves and bigger files.</p>
+          <dl class="tolerances">
+            <div><dt>Draft</dt><dd>0.2<small>mm</small></dd></div>
+            <div><dt>Standard</dt><dd>0.05<small>mm</small></dd></div>
+            <div><dt>Fine</dt><dd>0.01<small>mm</small></dd></div>
+          </dl>
+        </article>
+        <article class="cell cell-folder reveal">
+          <svg class="icon cell-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-files"/></svg>
+          <h3>Convert a whole folder</h3>
+          <p>Drop dozens of files, or a whole folder, at once. They convert in parallel and download as one ZIP.</p>
+          <ul class="exts" aria-label="Supported file extensions">
+            <li>.step</li><li>.stp</li><li>.iges</li><li>.igs</li>
+          </ul>
+        </article>
+        <article class="cell cell-preview reveal">
+          <div class="cell-preview-copy">
+            <svg class="icon cell-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-cube"/></svg>
+            <h3>Check it before you slice</h3>
+            <p>Open any result in a 3D preview and orbit around it to make sure every part came through.</p>
+          </div>
+          <picture class="cell-render">
+            <source srcset="/assets/render-part-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="/assets/render-part.webp" width="536" height="512" loading="lazy" decoding="async" alt="A converted CAD bracket shown in the 3D preview, in orange on a grid">
+          </picture>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap print-band reveal" aria-labelledby="quote-title">
+      <svg class="icon print-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-printer"/></svg>
+      <div class="print-copy">
+        <h2 id="quote-title">No printer? Get it printed.</h2>
+        <p>Upload your STL to Mold and Matter and get an instant price to have it 3D printed for you.</p>
+      </div>
+      <a class="btn btn-inverse btn-lg" href="https://mnm3d.com/products/custom-3d-print?utm_source=3dconverter.bnap.dev&amp;utm_medium=referral&amp;utm_campaign=banner" target="_blank" rel="noopener">
+        Get instant quote<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-arrow-up-right"/></svg>
+      </a>
+    </section>
+
+    <section class="wrap howto" id="how-it-works" aria-labelledby="howto-title">
+      <div class="howto-head reveal">
+        <h2 id="howto-title">{{howtoTitle}}</h2>
+        <p class="howto-intro">{{howtoIntro}}</p>
+      </div>
+      <ol class="howto-list">
+        <li class="reveal">
+          <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-file-arrow-up"/></svg></span>
+          <h3>Add your files</h3>
+          <p>{{howtoAdd}}</p>
+        </li>
+        <li class="reveal">
+          <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-sliders-horizontal"/></svg></span>
+          <h3>Pick a mesh quality</h3>
+          <p>Standard works for most prints. Choose Fine for small parts with tight curves, or Draft for quick checks.</p>
+        </li>
+        <li class="reveal">
+          <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-download-simple"/></svg></span>
+          <h3>Download your STL files</h3>
+          <p>Save each STL on its own or everything as one ZIP, then open it in Cura, PrusaSlicer, Bambu Studio or OrcaSlicer.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="wrap faq" id="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">{{faqTitle}}</h2>
+      <div class="faq-list">
+{{faq}}      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="footer-top">
+        <a class="wordmark" href="/" aria-label="3D Converter home">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-cube"/></svg>
+          <span>3D Converter</span>
+        </a>
+        <nav class="related" aria-label="Converters">{{related}}</nav>
+      </div>
+      <div class="footer-bottom">
+        <p class="made-with">
+          Made with
+          <svg class="icon heart" role="img" aria-label="love"><use href="/assets/icons-v1.svg#i-heart"/></svg>
+          by <a href="https://bnap.dev">bnap.dev</a>
+        </p>
+        <p class="credits">CAD import by <a href="https://github.com/kovacsv/occt-import-js" rel="noopener">occt-import-js</a> and OpenCascade (LGPL-2.1). Icons by <a href="https://phosphoricons.com" rel="noopener">Phosphor</a>.</p>
+      </div>
+    </div>
+  </footer>
+
+  <template id="row-template">
+    <li class="row" data-status="queued">
+      <svg class="icon row-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-cube"/></svg>
+      <div class="row-main">
+        <p class="row-name"></p>
+        <p class="row-meta"></p>
+        <span class="row-progress shimmer" aria-hidden="true"></span>
+      </div>
+      <div class="row-actions">
+        <button type="button" class="icon-btn" data-action="preview" title="Preview in 3D" aria-label="Preview in 3D" disabled>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-cube"/></svg>
+        </button>
+        <button type="button" class="icon-btn" data-action="download" title="Download STL" aria-label="Download STL" disabled>
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-download-simple"/></svg>
+        </button>
+        <button type="button" class="icon-btn" data-action="remove" title="Remove" aria-label="Remove">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-x"/></svg>
+        </button>
+      </div>
+    </li>
+  </template>
+
+  <dialog class="preview" id="preview" aria-labelledby="preview-title">
+    <div class="preview-head">
+      <h2 id="preview-title">Preview</h2>
+      <button type="button" class="icon-btn" id="preview-close" aria-label="Close preview">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-x"/></svg>
+      </button>
+    </div>
+    <div class="preview-stage" id="preview-stage">
+      <span class="preview-loading shimmer" aria-hidden="true"></span>
+    </div>
+    <p class="preview-help">Drag to orbit, scroll to zoom, right-drag to pan.</p>
+  </dialog>
+</body>
+</html>
