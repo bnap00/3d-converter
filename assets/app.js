@@ -31,6 +31,27 @@ const els = {
   previewClose: $("#preview-close"),
 };
 
+/* ---------- Analytics ---------- */
+
+// Usage events for Rybbit, which is loaded in the page head. Only sends formats, settings,
+// size buckets, timings and error categories. Never file names or file contents.
+function track(name, props) {
+  try { window.rybbit?.event(name, props); } catch {}
+}
+function sizeBucket(bytes) {
+  const mb = bytes / 1024 / 1024;
+  return mb < 1 ? "<1 MB" : mb < 10 ? "1-10 MB" : mb < 50 ? "10-50 MB" : "50+ MB";
+}
+const ERROR_KINDS = [
+  [/out of memory/i, "out_of_memory"],
+  [/crashed/i, "crashed"],
+  [/from disk/i, "disk_read"],
+  [/could not be read/i, "unreadable"],
+  [/no solid geometry/i, "no_geometry"],
+];
+const errorKind = (message) => (ERROR_KINDS.find(([re]) => re.test(message)) || [null, "other"])[1];
+const seconds = (ms) => Math.round(ms / 100) / 10;
+
 /* ---------- Worker pool ---------- */
 
 class ConverterPool {
@@ -53,6 +74,7 @@ class ConverterPool {
   warmup() {
     if (this.started) return;
     this.started = true;
+    this.warmupAt = performance.now();
     for (let i = 0; i < this.size; i++) this.idle.push(this.spawn());
   }
 
@@ -106,6 +128,7 @@ class ConverterPool {
 
 let engineReady = false;
 const pool = new ConverterPool(() => {
+  if (!engineReady) track("engine_ready", { seconds: seconds(performance.now() - pool.warmupAt) });
   engineReady = true;
   els.engine.hidden = true;
 });
@@ -116,6 +139,7 @@ const settings = { quality: "standard", splitBodies: false };
 /** @type {Map<string, {id:string,file:File,format:string,status:string,outputs?:any[],bodies?:number,error?:string,settingsKey?:string,el:HTMLElement,run:number}>} */
 const items = new Map();
 let seq = 0;
+let batchBusy = false;
 
 const settingsKey = () => `${settings.quality}|${settings.splitBodies}`;
 
@@ -130,15 +154,17 @@ const plural = (n, word) => `${n.toLocaleString()} ${word}${n === 1 ? "" : "s"}`
 
 /* ---------- Adding files ---------- */
 
-function addFiles(fileList) {
+function addFiles(fileList, source) {
   const files = Array.from(fileList || []);
   if (!files.length) return;
 
   const skipped = [];
+  const exts = new Set();
   for (const file of files) {
     const ext = file.name.split(".").pop().toLowerCase();
     const format = FORMATS[ext];
     if (!format) { skipped.push(file.name); continue; }
+    exts.add(ext);
 
     const id = `f${++seq}`;
     const el = els.rowTemplate.content.firstElementChild.cloneNode(true);
@@ -147,7 +173,7 @@ function addFiles(fileList) {
     el.querySelector(".row-name").title = file.name;
     els.queue.append(el);
 
-    const item = { id, file, format, status: "queued", el, run: 0 };
+    const item = { id, file, ext, format, status: "queued", el, run: 0 };
     items.set(id, item);
     renderRow(item);
     convert(item);
@@ -159,6 +185,12 @@ function addFiles(fileList) {
   } else {
     showNotice("");
   }
+  track("files_added", {
+    source,
+    files: files.length - skipped.length,
+    skipped: skipped.length,
+    formats: [...exts].sort().join(","),
+  });
   renderSummary();
 }
 
@@ -184,6 +216,7 @@ async function convert(item) {
     onStart: () => {
       if (!items.has(item.id) || item.run !== run) return;
       item.status = "converting";
+      item.startedAt = performance.now();
       renderRow(item);
     },
     prepare: async () => {
@@ -203,6 +236,25 @@ async function convert(item) {
 
   if (res.ok) Object.assign(item, { status: "done", outputs: res.outputs, bodies: res.bodies });
   else Object.assign(item, { status: "error", error: res.error });
+
+  const common = {
+    format: item.ext,
+    quality,
+    split_bodies: split === "true",
+    size: sizeBucket(item.file.size),
+    rerun: run > 1,
+    seconds: item.startedAt ? seconds(performance.now() - item.startedAt) : 0,
+  };
+  if (res.ok) {
+    track("conversion_done", {
+      ...common,
+      bodies: res.bodies,
+      stl_files: res.outputs.length,
+      triangles: res.outputs.reduce((s, o) => s + o.triangles, 0),
+    });
+  } else {
+    track("conversion_failed", { ...common, reason: errorKind(res.error) });
+  }
   renderRow(item);
   renderSummary();
 }
@@ -256,6 +308,8 @@ function renderSummary() {
   els.summary.innerHTML = text;
 
   if (!pending) els.engine.hidden = true;
+  if (batchBusy && !pending && all.length) track("batch_finished", { files: all.length, done, failed });
+  batchBusy = pending > 0;
 
   const stale = all.some((i) => (i.status === "done" || i.status === "error") && i.settingsKey !== settingsKey());
   els.reapply.hidden = !stale;
@@ -292,6 +346,7 @@ async function saveZip(outputs, filename) {
 }
 
 function downloadItem(item) {
+  track("download", { scope: "single", kind: item.outputs.length === 1 ? "stl" : "zip", stl_files: item.outputs.length });
   if (item.outputs.length === 1) {
     const o = item.outputs[0];
     saveBlob(new Blob([o.data], { type: "model/stl" }), o.name.split("/").pop());
@@ -303,6 +358,7 @@ function downloadItem(item) {
 async function downloadAll() {
   const outputs = [...items.values()].filter((i) => i.status === "done").flatMap((i) => i.outputs);
   if (!outputs.length) return;
+  track("download", { scope: "all", kind: outputs.length === 1 ? "stl" : "zip", stl_files: outputs.length });
   if (outputs.length === 1) {
     saveBlob(new Blob([outputs[0].data], { type: "model/stl" }), outputs[0].name.split("/").pop());
     return;
@@ -330,6 +386,7 @@ async function openPreview(item) {
   els.previewTitle.textContent = item.file.name;
   els.previewStage.classList.remove("is-ready");
   els.preview.showModal();
+  track("preview_opened", { format: item.ext, bodies: item.bodies });
   try {
     previewModule ??= import("/assets/preview.js");
     const { mountPreview } = await previewModule;
@@ -337,6 +394,7 @@ async function openPreview(item) {
     closePreview = mountPreview(els.previewStage, item.outputs.map((o) => o.data));
     els.previewStage.classList.add("is-ready");
   } catch {
+    track("preview_failed");
     els.previewTitle.textContent = "Preview could not load. Your browser may not support WebGL.";
   }
 }
@@ -351,7 +409,7 @@ els.preview.addEventListener("click", (e) => { if (e.target === els.preview) els
 /* ---------- Events ---------- */
 
 els.input.addEventListener("change", () => {
-  addFiles(els.input.files);
+  addFiles(els.input.files, "picker");
   els.input.value = "";
 });
 
@@ -384,9 +442,9 @@ window.addEventListener("drop", async (e) => {
     .filter(Boolean);
   if (entries.some((entry) => entry.isDirectory)) {
     const files = (await Promise.all(entries.map(readEntry))).flat();
-    addFiles(files);
+    addFiles(files, "folder");
   } else {
-    addFiles(e.dataTransfer.files);
+    addFiles(e.dataTransfer.files, "drop");
   }
 });
 
@@ -409,18 +467,22 @@ document.querySelectorAll('input[name="quality"]').forEach((radio) =>
   radio.addEventListener("change", () => {
     settings.quality = radio.value;
     els.qualityHint.textContent = QUALITY_HINTS[radio.value];
+    track("quality_changed", { quality: radio.value });
     renderSummary();
   })
 );
 els.split.addEventListener("change", () => {
   settings.splitBodies = els.split.checked;
+  track("split_bodies_changed", { enabled: els.split.checked });
   renderSummary();
 });
 
 els.reapplyBtn.addEventListener("click", () => {
-  for (const item of items.values()) {
-    if ((item.status === "done" || item.status === "error") && item.settingsKey !== settingsKey()) convert(item);
-  }
+  const stale = [...items.values()].filter(
+    (item) => (item.status === "done" || item.status === "error") && item.settingsKey !== settingsKey()
+  );
+  track("reconvert", { files: stale.length, quality: settings.quality, split_bodies: settings.splitBodies });
+  stale.forEach(convert);
 });
 
 els.queue.addEventListener("click", (e) => {
@@ -441,6 +503,7 @@ els.queue.addEventListener("click", (e) => {
 });
 
 els.clearBtn.addEventListener("click", () => {
+  track("queue_cleared", { files: items.size });
   items.clear();
   els.queue.replaceChildren();
   showNotice("");
@@ -448,3 +511,10 @@ els.clearBtn.addEventListener("click", () => {
 });
 
 els.downloadAll.addEventListener("click", downloadAll);
+
+// Which questions people open tells us what the page does not explain well enough.
+document.querySelectorAll(".faq details").forEach((details) =>
+  details.addEventListener("toggle", () => {
+    if (details.open) track("faq_opened", { question: details.querySelector("summary").textContent.trim() });
+  })
+);

@@ -22,6 +22,24 @@ Commit the generated files. Vercel serves them as-is.
 Then open http://localhost:4173. This dev server handles clean URLs
 (`/stp-to-stl`) and the 404 page the same way Vercel does.
 
+## Analytics
+
+Rybbit (self-hosted at r.bnap.dev) records page views and outbound clicks on
+its own. `assets/app.js` adds these custom events. They never include file
+names or file contents.
+
+| Event | Properties |
+| --- | --- |
+| `files_added` | `source` (picker, drop, folder), `files`, `skipped`, `formats` |
+| `engine_ready` | `seconds` to load the converter engine |
+| `conversion_done` | `format`, `quality`, `split_bodies`, `size` bucket, `rerun`, `seconds`, `bodies`, `stl_files`, `triangles` |
+| `conversion_failed` | same as above minus the output counts, plus `reason` (unreadable, no_geometry, out_of_memory, crashed, disk_read, other) |
+| `batch_finished` | `files`, `done`, `failed` |
+| `download` | `scope` (single, all), `kind` (stl, zip), `stl_files` |
+| `preview_opened` / `preview_failed` | `format`, `bodies` |
+| `quality_changed`, `split_bodies_changed`, `reconvert`, `queue_cleared` | the new setting or file count |
+| `faq_opened` | `question` |
+
 ## Deploy
 
 Vercel, Framework Preset "Other", no build command. Caching and headers are in
