@@ -308,10 +308,13 @@ h1 {
 .queue-summary strong { color: var(--text); font-weight: 600; }
 .queue-actions { display: flex; gap: 8px; }
 
-.ready-to-print { font-size: 14px; color: var(--muted); }
-.ready-to-print a { color: var(--accent); font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; }
-.ready-to-print a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.ready-to-print .icon { width: 15px; height: 15px; }
+/* Shown once something has converted: print offer on the left, GitHub star on the right */
+.after-convert { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; }
+.after-convert:not(:has(> :not([hidden]))) { display: none; }
+.ready-to-print, .star-cta { font-size: 14px; color: var(--muted); animation: row-in .35s var(--ease) both; }
+.ready-to-print a, .star-cta a { color: var(--accent); font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 2px; }
+.ready-to-print a:hover, .star-cta a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ready-to-print .icon, .star-cta .icon { width: 15px; height: 15px; }
 
 /* Section headings share one scale */
 .features h2, .howto h2, .faq h2 {

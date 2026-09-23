@@ -24,6 +24,7 @@ const els = {
   clearBtn: $("#clear-btn"),
   downloadAll: $("#download-all"),
   readyToPrint: $("#ready-to-print"),
+  starCta: $("#star-cta"),
   rowTemplate: $("#row-template"),
   preview: $("#preview"),
   previewTitle: $("#preview-title"),
@@ -302,6 +303,7 @@ function renderSummary() {
   els.bar.hidden = all.length === 0;
   els.downloadAll.disabled = done === 0;
   els.readyToPrint.hidden = done === 0;
+  els.starCta.hidden = done === 0;
 
   let text = `<strong>${done} of ${all.length}</strong> converted`;
   if (failed) text += `, ${failed} failed`;

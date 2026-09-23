@@ -39,6 +39,7 @@ names or file contents.
 | `preview_opened` / `preview_failed` | `format`, `bodies` |
 | `quality_changed`, `split_bodies_changed`, `reconvert`, `queue_cleared` | the new setting or file count |
 | `faq_opened` | `question` |
+| `github_star_click` | none (the "Star it on GitHub" link shown after a conversion) |
 
 ## Deploy
 
