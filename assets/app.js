@@ -6,6 +6,26 @@ const QUALITY_HINTS = {
   fine: "0.01 mm tolerance, smooth curves, large files",
 };
 const FORMATS = { step: "step", stp: "step", iges: "iges", igs: "iges" };
+// Build volumes in mm (X, Y, Z).
+const PRINTERS = [
+  ["bambu", "Bambu Lab X1, P1 or A1", [256, 256, 256]],
+  ["bambu-h2d", "Bambu Lab H2D", [325, 320, 325]],
+  ["bambu-mini", "Bambu Lab A1 mini", [180, 180, 180]],
+  ["prusa-mk4", "Prusa MK4 or MK3S", [250, 210, 220]],
+  ["prusa-core", "Prusa Core One", [250, 220, 270]],
+  ["prusa-mini", "Prusa MINI", [180, 180, 180]],
+  ["ender3", "Creality Ender-3", [220, 220, 250]],
+  ["k1", "Creality K1 or K1C", [220, 220, 250]],
+  ["k1max", "Creality K1 Max", [300, 300, 300]],
+  ["neptune4", "Elegoo Neptune 4 Pro", [225, 225, 265]],
+  ["kobra3", "Anycubic Kobra 3", [250, 250, 260]],
+  ["voron350", "Voron 2.4 (350)", [350, 350, 340]],
+];
+const PIN_HINTS = {
+  filament: "Glue a 9 mm length of 1.75 mm filament into each pair of holes.",
+  printed: "The pins come as their own STL. Print them standing up.",
+  none: "Pieces get flat cut faces with no holes.",
+};
 
 const $ = (sel) => document.querySelector(sel);
 const els = {
@@ -15,6 +35,12 @@ const els = {
   notice: $("#notice"),
   qualityHint: $("#quality-hint"),
   split: $("#split-bodies"),
+  fit: $("#fit-bed"),
+  fitOptions: $("#fit-options"),
+  printer: $("#printer"),
+  bed: [$("#bed-x"), $("#bed-y"), $("#bed-z")],
+  pins: $("#pins"),
+  fitHint: $("#fit-hint"),
   reapply: $("#reapply"),
   reapplyBtn: $("#reapply-btn"),
   engine: $("#engine"),
@@ -136,13 +162,20 @@ const pool = new ConverterPool(() => {
 
 /* ---------- State ---------- */
 
-const settings = { quality: "standard", splitBodies: false };
+const settings = {
+  quality: "standard",
+  splitBodies: false,
+  fit: { enabled: false, printer: PRINTERS[0][0], bed: PRINTERS[0][2], pins: "filament" },
+};
 /** @type {Map<string, {id:string,file:File,format:string,status:string,outputs?:any[],bodies?:number,error?:string,settingsKey?:string,el:HTMLElement,run:number}>} */
 const items = new Map();
 let seq = 0;
 let batchBusy = false;
 
-const settingsKey = () => `${settings.quality}|${settings.splitBodies}`;
+const settingsKey = () => {
+  const { enabled, bed, pins } = settings.fit;
+  return `${settings.quality}|${settings.splitBodies}|${enabled ? `${bed.join("x")}|${pins}` : "uncut"}`;
+};
 
 /* ---------- Formatting ---------- */
 
@@ -211,7 +244,8 @@ async function convert(item) {
 
   if (!engineReady) els.engine.hidden = false;
 
-  const [quality, split] = item.settingsKey.split("|");
+  const { quality, splitBodies } = settings;
+  const fit = settings.fit.enabled ? { bed: [...settings.fit.bed], pins: settings.fit.pins } : null;
   const res = await pool.convert({
     id: `${item.id}:${run}`,
     onStart: () => {
@@ -228,20 +262,21 @@ async function convert(item) {
       } catch {
         throw new Error("Could not read this file from disk.");
       }
-      return { name: item.file.name, format: item.format, buffer, quality, splitBodies: split === "true" };
+      return { name: item.file.name, format: item.format, buffer, quality, splitBodies, fit };
     },
   });
 
   // Ignore results for removed items or superseded runs.
   if (!items.has(item.id) || item.run !== run) return;
 
-  if (res.ok) Object.assign(item, { status: "done", outputs: res.outputs, bodies: res.bodies });
+  if (res.ok) Object.assign(item, { status: "done", outputs: res.outputs, bodies: res.bodies, cut: fit && { pieces: res.pieces, pins: res.pins } });
   else Object.assign(item, { status: "error", error: res.error });
 
   const common = {
     format: item.ext,
     quality,
-    split_bodies: split === "true",
+    split_bodies: splitBodies,
+    fit: Boolean(fit),
     size: sizeBucket(item.file.size),
     rerun: run > 1,
     seconds: item.startedAt ? seconds(performance.now() - item.startedAt) : 0,
@@ -252,6 +287,7 @@ async function convert(item) {
       bodies: res.bodies,
       stl_files: res.outputs.length,
       triangles: res.outputs.reduce((s, o) => s + o.triangles, 0),
+      ...(fit && { pieces: res.pieces, pins: res.pins }),
     });
   } else {
     track("conversion_failed", { ...common, reason: errorKind(res.error) });
@@ -273,7 +309,13 @@ function renderRow(item) {
     const bytes = item.outputs.reduce((s, o) => s + o.data.byteLength, 0);
     const tris = item.outputs.reduce((s, o) => s + o.triangles, 0);
     const parts = [`${size} to ${formatBytes(bytes)}`, plural(tris, "triangle")];
-    if (item.outputs.length > 1) parts.push(`${item.outputs.length} STL files`);
+    if (item.cut && item.cut.pieces > 1) {
+      parts.push(`cut into ${item.cut.pieces} pieces`);
+      if (item.cut.pins) parts.push(plural(item.cut.pins, "pin"));
+    } else if (item.cut) {
+      parts.push("fits your printer");
+    }
+    if (item.outputs.length > 1 && !(item.cut && item.cut.pieces > 1)) parts.push(`${item.outputs.length} STL files`);
     meta.textContent = parts.join(", ");
     icon.setAttribute("href", "/assets/icons-v1.svg#i-check-circle");
   } else if (item.status === "error") {
@@ -393,7 +435,8 @@ async function openPreview(item) {
     previewModule ??= import("/assets/preview.js");
     const { mountPreview } = await previewModule;
     if (!els.preview.open) return;
-    closePreview = mountPreview(els.previewStage, item.outputs.map((o) => o.data));
+    const parts = item.outputs.filter((o) => !o.pins);
+    closePreview = mountPreview(els.previewStage, parts.map((o) => o.data), { explode: Boolean(item.cut && item.cut.pieces > 1) });
     els.previewStage.classList.add("is-ready");
   } catch {
     track("preview_failed");
@@ -473,6 +516,74 @@ document.querySelectorAll('input[name="quality"]').forEach((radio) =>
     renderSummary();
   })
 );
+/* ---------- Cut to fit ---------- */
+
+els.printer.append(
+  ...PRINTERS.map(([value, label]) => new Option(label, value)),
+  new Option("Custom size", "custom")
+);
+
+// Remember the printer between visits. Storage can be unavailable, so it is only a convenience.
+try {
+  const saved = JSON.parse(localStorage.getItem("fit") || "null");
+  if (saved && Array.isArray(saved.bed) && saved.bed.length === 3 && saved.bed.every((n) => n >= 20)) {
+    Object.assign(settings.fit, { printer: saved.printer, bed: saved.bed, pins: PIN_HINTS[saved.pins] ? saved.pins : "filament" });
+  }
+} catch {}
+
+function renderFit() {
+  const { enabled, printer, bed, pins } = settings.fit;
+  els.fit.checked = enabled;
+  els.fitOptions.hidden = !enabled;
+  els.printer.value = PRINTERS.some((p) => p[0] === printer) ? printer : "custom";
+  els.bed.forEach((input, i) => { if (Number(input.value) !== bed[i]) input.value = bed[i]; });
+  els.pins.value = pins;
+  els.fitHint.textContent = `${PIN_HINTS[pins]} Each piece keeps 5 mm clear around it for a brim.`;
+}
+
+function fitChanged() {
+  try {
+    const { printer, bed, pins } = settings.fit;
+    localStorage.setItem("fit", JSON.stringify({ printer, bed, pins }));
+  } catch {}
+  renderFit();
+  renderSummary();
+}
+
+els.fit.addEventListener("change", () => {
+  settings.fit.enabled = els.fit.checked;
+  track("fit_changed", { enabled: els.fit.checked, printer: settings.fit.printer, pins: settings.fit.pins });
+  fitChanged();
+});
+els.printer.addEventListener("change", () => {
+  const preset = PRINTERS.find((p) => p[0] === els.printer.value);
+  settings.fit.printer = els.printer.value;
+  if (preset) settings.fit.bed = [...preset[2]];
+  else els.bed[0].focus();
+  track("printer_changed", { printer: els.printer.value });
+  fitChanged();
+});
+els.bed.forEach((input) =>
+  input.addEventListener("change", () => {
+    const bed = els.bed.map((el) => Math.round(Number(el.value)));
+    // Ignore sizes that are not real, and put the last valid value back.
+    if (bed.some((n) => !Number.isFinite(n) || n < 20 || n > 5000)) {
+      renderFit();
+      return;
+    }
+    settings.fit.bed = bed;
+    const preset = PRINTERS.find((p) => p[2].every((n, i) => n === bed[i]));
+    settings.fit.printer = preset ? preset[0] : "custom";
+    fitChanged();
+  })
+);
+els.pins.addEventListener("change", () => {
+  settings.fit.pins = els.pins.value;
+  track("pins_changed", { pins: els.pins.value });
+  fitChanged();
+});
+renderFit();
+
 els.split.addEventListener("change", () => {
   settings.splitBodies = els.split.checked;
   track("split_bodies_changed", { enabled: els.split.checked });
@@ -483,7 +594,7 @@ els.reapplyBtn.addEventListener("click", () => {
   const stale = [...items.values()].filter(
     (item) => (item.status === "done" || item.status === "error") && item.settingsKey !== settingsKey()
   );
-  track("reconvert", { files: stale.length, quality: settings.quality, split_bodies: settings.splitBodies });
+  track("reconvert", { files: stale.length, quality: settings.quality, split_bodies: settings.splitBodies, fit: settings.fit.enabled });
   stale.forEach(convert);
 });
 

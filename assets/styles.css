@@ -260,6 +260,23 @@ h1 {
 .switch-text { font-size: 14px; font-weight: 500; display: grid; }
 .switch-text small { font-weight: 400; color: var(--muted); font-size: 13px; }
 
+/* Cut to fit: printer, build volume and pin options, shown once the switch is on */
+.fit { display: grid; gap: 14px; padding-top: 16px; border-top: 1px solid var(--border); }
+.switch-inline { padding-top: 0; }
+.fit-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; align-items: start; animation: row-in .3s var(--ease) both; }
+.field { display: grid; gap: 6px; border: 0; margin: 0; padding: 0; min-width: 0; font-size: 14px; font-weight: 500; }
+.field legend { padding: 0; margin-bottom: 6px; }
+.field select, .field input {
+  font: inherit; font-weight: 400; color: var(--text); background: var(--surface);
+  border: 1px solid var(--border-strong); border-radius: var(--r-control); height: 36px; padding: 0 10px; min-width: 0; width: 100%;
+}
+.field select { cursor: pointer; }
+.field input { font-family: var(--mono); font-size: 13px; }
+.field select:focus-visible, .field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.bed-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.bed-inputs label { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.fit-hint { grid-column: 1 / -1; margin-top: 0; }
+
 .reapply {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   font-size: 14px; padding: 10px 12px; border-radius: var(--r-control); background: var(--surface-2);
@@ -501,6 +518,7 @@ h1 {
   .dropzone { padding: 40px 16px; }
   .settings { grid-template-columns: 1fr; gap: 16px; }
   .switch { padding-top: 0; }
+  .fit-options { grid-template-columns: 1fr; }
   .bento { margin-top: 28px; gap: 12px; }
   .cell { padding: 24px; min-height: 0; }
   .cell-private .cell-icon { padding-bottom: 20px; }

@@ -157,6 +157,14 @@
         },
         {
           "@type": "Question",
+          "name": "Can it split a part that is too big for my printer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Turn on \"Cut to fit my printer\" and pick your printer or type its build volume. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "Is there a file size limit?",
           "acceptedAnswer": {
             "@type": "Answer",
@@ -265,6 +273,37 @@
             <span class="switch-track" aria-hidden="true"></span>
             <span class="switch-text">One STL per body<small>For assemblies and multi-body parts</small></span>
           </label>
+        </div>
+
+        <div class="fit">
+          <label class="switch switch-inline">
+            <input type="checkbox" id="fit-bed" role="switch" aria-controls="fit-options">
+            <span class="switch-track" aria-hidden="true"></span>
+            <span class="switch-text">Cut to fit my printer<small>Splits parts bigger than your build volume into pieces you glue together</small></span>
+          </label>
+          <div class="fit-options" id="fit-options" hidden>
+            <label class="field">
+              <span>Printer</span>
+              <select id="printer"></select>
+            </label>
+            <fieldset class="field">
+              <legend>Build volume (mm)</legend>
+              <div class="bed-inputs">
+                <label><span>X</span><input type="number" id="bed-x" min="20" max="5000" step="1" inputmode="numeric"></label>
+                <label><span>Y</span><input type="number" id="bed-y" min="20" max="5000" step="1" inputmode="numeric"></label>
+                <label><span>Z</span><input type="number" id="bed-z" min="20" max="5000" step="1" inputmode="numeric"></label>
+              </div>
+            </fieldset>
+            <label class="field">
+              <span>Alignment pins</span>
+              <select id="pins">
+                <option value="filament">Holes for 1.75 mm filament</option>
+                <option value="printed">Holes plus printable pins</option>
+                <option value="none">No pins, flat cuts</option>
+              </select>
+            </label>
+            <p class="hint fit-hint" id="fit-hint"></p>
+          </div>
         </div>
 
         <div class="reapply" id="reapply" hidden>
@@ -398,6 +437,10 @@
         <details>
           <summary>What does "One STL per body" do?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-caret-down"/></svg></summary>
           <p>By default an assembly becomes a single STL. Turn this on to get a separate STL for each body, grouped in a folder named after the source file.</p>
+        </details>
+        <details>
+          <summary>Can it split a part that is too big for my printer?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-caret-down"/></svg></summary>
+          <p>Yes. Turn on "Cut to fit my printer" and pick your printer or type its build volume. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL.</p>
         </details>
         <details>
           <summary>Is there a file size limit?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-caret-down"/></svg></summary>

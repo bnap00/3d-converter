@@ -60,6 +60,37 @@ function safeName(name, fallback) {
   return cleaned || fallback;
 }
 
+/* Cuts parts that are bigger than the printer into pieces, one STL per piece. */
+async function cutForPrinter(meshes, base, splitBodies, fit) {
+  const { cutToFit } = await import("/assets/cutter.js");
+  const perBody = splitBodies && meshes.length > 1;
+  const res = cutToFit(meshes, { bed: fit.bed, pins: fit.pins, perBody });
+
+  const outputs = [];
+  const used = new Map();
+  const unique = (n) => {
+    const seen = used.get(n) || 0;
+    used.set(n, seen + 1);
+    return seen ? `${n}-${seen + 1}` : n;
+  };
+  let pieces = 0;
+  res.groups.forEach((group, g) => {
+    const label = perBody ? unique(safeName(group.name, `body-${g + 1}`)) : base;
+    const total = group.pieces.length;
+    pieces += total;
+    group.pieces.forEach((piece, i) => {
+      const n = total > 1 ? `${label}-part-${i + 1}-of-${total}` : label;
+      outputs.push({ name: `${base}/${n}.stl`, data: writeBinaryStl(piece, n), triangles: triangleCount(piece) });
+    });
+  });
+  if (res.pinSet) {
+    outputs.push({ name: `${base}/${base}-pins-x${res.pins}.stl`, data: writeBinaryStl([res.pinSet], "pins"), triangles: triangleCount([res.pinSet]), pins: true });
+  }
+  // A single part that already fits keeps its plain name, like a normal conversion.
+  if (outputs.length === 1) outputs[0].name = outputs[0].name.split("/").pop();
+  return { outputs, pieces, pins: res.pins };
+}
+
 self.onmessage = async (e) => {
   const msg = e.data;
   if (msg.type === "warmup") {
@@ -67,7 +98,7 @@ self.onmessage = async (e) => {
     return;
   }
 
-  const { id, name, format, buffer, quality, splitBodies } = msg;
+  const { id, name, format, buffer, quality, splitBodies, fit } = msg;
   try {
     const lib = await loadOcct();
     const q = QUALITY[quality] || QUALITY.standard;
@@ -92,6 +123,11 @@ self.onmessage = async (e) => {
 
     const base = safeName(name.replace(/\.(step|stp|iges|igs)$/i, ""), "model");
     const outputs = [];
+    if (fit) {
+      const cut = await cutForPrinter(meshes, base, splitBodies, fit);
+      self.postMessage({ id, ok: true, outputs: cut.outputs, bodies: meshes.length, pieces: cut.pieces, pins: cut.pins }, cut.outputs.map((o) => o.data));
+      return;
+    }
     if (splitBodies && meshes.length > 1) {
       const used = new Map();
       meshes.forEach((m, i) => {

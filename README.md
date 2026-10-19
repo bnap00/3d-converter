@@ -32,14 +32,24 @@ names or file contents.
 | --- | --- |
 | `files_added` | `source` (picker, drop, folder), `files`, `skipped`, `formats` |
 | `engine_ready` | `seconds` to load the converter engine |
-| `conversion_done` | `format`, `quality`, `split_bodies`, `size` bucket, `rerun`, `seconds`, `bodies`, `stl_files`, `triangles` |
+| `conversion_done` | `format`, `quality`, `split_bodies`, `fit`, `size` bucket, `rerun`, `seconds`, `bodies`, `stl_files`, `triangles`, plus `pieces` and `pins` when cutting to fit |
 | `conversion_failed` | same as above minus the output counts, plus `reason` (unreadable, no_geometry, out_of_memory, crashed, disk_read, other) |
 | `batch_finished` | `files`, `done`, `failed` |
 | `download` | `scope` (single, all), `kind` (stl, zip), `stl_files` |
 | `preview_opened` / `preview_failed` | `format`, `bodies` |
 | `quality_changed`, `split_bodies_changed`, `reconvert`, `queue_cleared` | the new setting or file count |
+| `fit_changed`, `printer_changed`, `pins_changed` | the "Cut to fit my printer" switch, printer preset and pin type |
 | `faq_opened` | `question` |
 | `github_star_click` | none (the "Star it on GitHub" link shown after a conversion) |
+
+## Cut to fit
+
+`assets/cutter.js` splits parts that are bigger than the chosen build volume.
+The converter worker loads it only when "Cut to fit my printer" is on. It welds
+each body's mesh, cuts it with an even grid of planes (5 mm brim margin on X
+and Y), caps every cut with a triangulated face so each piece stays closed,
+and adds matching blind holes for alignment pins on both sides of a cut where
+there is enough solid material around them.
 
 ## Deploy
 

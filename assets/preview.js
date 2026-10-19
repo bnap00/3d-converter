@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "/vendor/three@0.186.0/addons/OrbitControls.js";
 import { STLLoader } from "/vendor/three@0.186.0/addons/STLLoader.js";
 
-export function mountPreview(stage, buffers) {
+export function mountPreview(stage, buffers, { explode = false } = {}) {
   const dark = matchMedia("(prefers-color-scheme: dark)").matches;
   const css = getComputedStyle(document.documentElement);
   const accent = new THREE.Color(css.getPropertyValue("--accent").trim() || "#c2410c");
@@ -27,11 +27,28 @@ export function mountPreview(stage, buffers) {
 
   const loader = new STLLoader();
   const material = new THREE.MeshStandardMaterial({ color: accent, roughness: 0.55, metalness: 0.05, side: THREE.DoubleSide });
-  const geometries = buffers.map((buf) => {
-    const g = loader.parse(buf);
-    model.add(new THREE.Mesh(g, material));
-    return g;
+  // Pieces of a cut part get alternating shades so the cuts are easy to see.
+  const materials = explode
+    ? [0.04, -0.12, -0.04].map((l) => new THREE.MeshStandardMaterial({ color: accent.clone().offsetHSL(0, 0, l), roughness: 0.55, metalness: 0.05, side: THREE.DoubleSide }))
+    : [material];
+  const meshes = buffers.map((buf, i) => {
+    const mesh = new THREE.Mesh(loader.parse(buf), materials[i % materials.length]);
+    model.add(mesh);
+    return mesh;
   });
+  const geometries = meshes.map((m) => m.geometry);
+
+  // Pull cut pieces slightly apart from the middle so each one reads on its own.
+  if (explode && meshes.length > 1) {
+    const whole = new THREE.Box3();
+    geometries.forEach((g) => { g.computeBoundingBox(); whole.union(g.boundingBox); });
+    const center = whole.getCenter(new THREE.Vector3());
+    const gap = whole.getSize(new THREE.Vector3()).length() * 0.04;
+    for (const mesh of meshes) {
+      const dir = mesh.geometry.boundingBox.getCenter(new THREE.Vector3()).sub(center);
+      if (dir.lengthSq() > 0) mesh.position.add(dir.normalize().multiplyScalar(gap));
+    }
+  }
 
   // Frame the model.
   const box = new THREE.Box3().setFromObject(model);
@@ -69,6 +86,7 @@ export function mountPreview(stage, buffers) {
     ro.disconnect();
     controls.dispose();
     geometries.forEach((g) => g.dispose());
+    materials.forEach((m) => m.dispose());
     material.dispose();
     grid.geometry.dispose();
     grid.material.dispose();

@@ -34,6 +34,10 @@ const faq = {
     q: 'What does "One STL per body" do?',
     a: "By default an assembly becomes a single STL. Turn this on to get a separate STL for each body, grouped in a folder named after the source file.",
   },
+  cut: {
+    q: "Can it split a part that is too big for my printer?",
+    a: 'Yes. Turn on "Cut to fit my printer" and pick your printer or type its build volume. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL.',
+  },
   stpSame: {
     q: "Is STP the same as STEP?",
     a: 'Yes. .stp and .step are two file extensions for the same format (ISO 10303, often called STEP AP203, AP214 or AP242). Both work here, and there is a page just for <a href="/stp-to-stl">STP to STL</a>.',
@@ -89,7 +93,7 @@ const pages = [
     howtoIntro: "STEP is the standard format for sharing CAD models. Slicers need a triangle mesh instead, which is what STL stores. This tool does the conversion on your own computer.",
     howtoAdd: "Drop STEP (.step, .stp) or IGES (.iges, .igs) files onto the converter, or click Choose files. You can also drop a whole folder.",
     faqTitle: "STEP to STL questions",
-    faq: ["uploaded", "types", "units", "quality", "bodies", "stpSame", "back", "size", "free"],
+    faq: ["uploaded", "types", "units", "quality", "bodies", "cut", "stpSame", "back", "size", "free"],
   },
   {
     file: "stp-to-stl.html",
@@ -109,7 +113,7 @@ const pages = [
     howtoIntro: ".stp is the short file extension for STEP, the standard CAD exchange format, and most CAD programs save with it. Slicers cannot print it directly, so it needs converting to an STL mesh first.",
     howtoAdd: "Drop your .stp files onto the converter, or click Choose files. .step and IGES files work too, and you can drop a whole folder.",
     faqTitle: "STP to STL questions",
-    faq: ["stpSame", "stpPrograms", "uploaded", "units", "quality", "bodies", "back", "size", "free"],
+    faq: ["stpSame", "stpPrograms", "uploaded", "units", "quality", "bodies", "cut", "back", "size", "free"],
   },
   {
     file: "iges-to-stl.html",
@@ -129,7 +133,7 @@ const pages = [
     howtoIntro: "IGES is an older neutral CAD format, saved as .igs or .iges. Many older CAD systems and machining workflows still use it. To 3D print an IGES part, it first needs converting to an STL mesh.",
     howtoAdd: "Drop your .igs or .iges files onto the converter, or click Choose files. STEP files work too, and you can drop a whole folder.",
     faqTitle: "IGES to STL questions",
-    faq: ["igesWhat", "igesGaps", "igesVsStep", "uploaded", "units", "quality", "bodies", "size", "free"],
+    faq: ["igesWhat", "igesGaps", "igesVsStep", "uploaded", "units", "quality", "bodies", "cut", "size", "free"],
   },
 ];
 

@@ -120,6 +120,37 @@
           </label>
         </div>
 
+        <div class="fit">
+          <label class="switch switch-inline">
+            <input type="checkbox" id="fit-bed" role="switch" aria-controls="fit-options">
+            <span class="switch-track" aria-hidden="true"></span>
+            <span class="switch-text">Cut to fit my printer<small>Splits parts bigger than your build volume into pieces you glue together</small></span>
+          </label>
+          <div class="fit-options" id="fit-options" hidden>
+            <label class="field">
+              <span>Printer</span>
+              <select id="printer"></select>
+            </label>
+            <fieldset class="field">
+              <legend>Build volume (mm)</legend>
+              <div class="bed-inputs">
+                <label><span>X</span><input type="number" id="bed-x" min="20" max="5000" step="1" inputmode="numeric"></label>
+                <label><span>Y</span><input type="number" id="bed-y" min="20" max="5000" step="1" inputmode="numeric"></label>
+                <label><span>Z</span><input type="number" id="bed-z" min="20" max="5000" step="1" inputmode="numeric"></label>
+              </div>
+            </fieldset>
+            <label class="field">
+              <span>Alignment pins</span>
+              <select id="pins">
+                <option value="filament">Holes for 1.75 mm filament</option>
+                <option value="printed">Holes plus printable pins</option>
+                <option value="none">No pins, flat cuts</option>
+              </select>
+            </label>
+            <p class="hint fit-hint" id="fit-hint"></p>
+          </div>
+        </div>
+
         <div class="reapply" id="reapply" hidden>
           <span>Settings changed.</span>
           <button type="button" class="btn btn-ghost btn-sm" id="reapply-btn">Convert again</button>
