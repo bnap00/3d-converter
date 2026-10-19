@@ -1,11 +1,11 @@
-/* 3D Converter: STEP/IGES to STL, entirely client-side. */
+/* 3D Converter: STEP/IGES to STL, and cutting STL to fit a printer, entirely client-side. */
 
 const QUALITY_HINTS = {
   draft: "0.2 mm tolerance, smallest files",
   standard: "0.05 mm tolerance, good for most prints",
   fine: "0.01 mm tolerance, smooth curves, large files",
 };
-const FORMATS = { step: "step", stp: "step", iges: "iges", igs: "iges" };
+const FORMATS = { step: "step", stp: "step", iges: "iges", igs: "iges", stl: "stl" };
 // Build volumes in mm (X, Y, Z).
 const PRINTERS = [
   ["bambu", "Bambu Lab X1, P1 or A1", [256, 256, 256]],
@@ -215,7 +215,9 @@ function addFiles(fileList, source) {
 
   if (skipped.length) {
     const names = skipped.slice(0, 3).join(", ") + (skipped.length > 3 ? ` and ${skipped.length - 3} more` : "");
-    showNotice(`Skipped ${plural(skipped.length, "file")} that ${skipped.length === 1 ? "is" : "are"} not STEP or IGES: ${names}.`);
+    showNotice(`Skipped ${plural(skipped.length, "file")} that ${skipped.length === 1 ? "is" : "are"} not STEP, IGES or STL: ${names}.`);
+  } else if (exts.has("stl") && !settings.fit.enabled) {
+    showNotice('STL files are already printable. Turn on "Cut to fit my printer" to split them into pieces.');
   } else {
     showNotice("");
   }

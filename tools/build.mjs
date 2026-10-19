@@ -36,7 +36,7 @@ const faq = {
   },
   cut: {
     q: "Can it split a part that is too big for my printer?",
-    a: 'Yes. Turn on "Cut to fit my printer" and pick your printer or type its build volume. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL.',
+    a: 'Yes. Turn on "Cut to fit my printer" and pick your printer or type its build volume. It works on STEP, IGES and STL files, so you can also cut an STL you already have. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL.',
   },
   stpSame: {
     q: "Is STP the same as STEP?",

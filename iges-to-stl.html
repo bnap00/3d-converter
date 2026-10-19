@@ -160,7 +160,7 @@
           "name": "Can it split a part that is too big for my printer?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Turn on \"Cut to fit my printer\" and pick your printer or type its build volume. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL."
+            "text": "Yes. Turn on \"Cut to fit my printer\" and pick your printer or type its build volume. It works on STEP, IGES and STL files, so you can also cut an STL you already have. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL."
           }
         },
         {
@@ -240,7 +240,7 @@
 
       <div class="converter" id="converter" data-has-items="false">
         <div class="converter-head">
-          <p class="io"><span>STEP</span><span>IGES</span><span class="io-to">to</span><span class="io-out">STL</span></p>
+          <p class="io"><span>STEP</span><span>IGES</span><span>STL</span><span class="io-to">to</span><span class="io-out">STL</span></p>
           <p class="local">
             <svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-lock-simple"/></svg>Runs on your device
           </p>
@@ -249,9 +249,9 @@
         <label class="dropzone" id="dropzone" for="file-input">
           <svg class="icon dz-icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-file-arrow-up"/></svg>
           <span class="dz-title">Drop IGES files here</span>
-          <span class="dz-help">.step, .stp, .iges, .igs. Add as many as you like.</span>
+          <span class="dz-help">.step, .stp, .iges, .igs, or .stl to cut. Add as many as you like.</span>
           <span class="btn btn-primary dz-button">Choose files</span>
-          <input id="file-input" type="file" multiple accept=".step,.stp,.iges,.igs" class="visually-hidden">
+          <input id="file-input" type="file" multiple accept=".step,.stp,.iges,.igs,.stl" class="visually-hidden">
         </label>
 
         <noscript><p class="notice">The converter needs JavaScript. Please enable it to convert files.</p></noscript>
@@ -366,7 +366,7 @@
           <h3>Convert a whole folder</h3>
           <p>Drop dozens of files, or a whole folder, at once. They convert in parallel and download as one ZIP.</p>
           <ul class="exts" aria-label="Supported file extensions">
-            <li>.step</li><li>.stp</li><li>.iges</li><li>.igs</li>
+            <li>.step</li><li>.stp</li><li>.iges</li><li>.igs</li><li>.stl</li>
           </ul>
         </article>
         <article class="cell cell-preview reveal">
@@ -440,7 +440,7 @@
         </details>
         <details>
           <summary>Can it split a part that is too big for my printer?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-caret-down"/></svg></summary>
-          <p>Yes. Turn on "Cut to fit my printer" and pick your printer or type its build volume. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL.</p>
+          <p>Yes. Turn on "Cut to fit my printer" and pick your printer or type its build volume. It works on STEP, IGES and STL files, so you can also cut an STL you already have. Parts that do not fit are cut into an even grid of pieces, each with closed cut faces, and every cut gets matching holes for alignment pins: glue in short lengths of 1.75 mm filament, or print the pins that come as their own STL.</p>
         </details>
         <details>
           <summary>Is there a file size limit?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-caret-down"/></svg></summary>

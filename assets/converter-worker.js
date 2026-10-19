@@ -1,4 +1,4 @@
-/* Runs OpenCascade (via occt-import-js) off the main thread and writes binary STL. */
+/* Runs OpenCascade (via occt-import-js) off the main thread and writes binary STL. STL input is read directly. */
 const OCCT_DIR = "/vendor/occt-import-js@0.0.23/";
 importScripts(OCCT_DIR + "occt-import-js.js");
 
@@ -55,6 +55,63 @@ function writeBinaryStl(meshes, header) {
   return buffer;
 }
 
+/* STL input is already a mesh, so it skips OpenCascade. Each ASCII "solid" becomes its own body. */
+function readStl(buffer) {
+  const view = new DataView(buffer);
+  const isBinary = buffer.byteLength >= 84 && 84 + view.getUint32(80, true) * 50 === buffer.byteLength;
+  const head = new TextDecoder().decode(new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 512)));
+  if (!isBinary && /^\s*solid\b/.test(head)) return readAsciiStl(new TextDecoder().decode(buffer));
+  if (buffer.byteLength < 84) return [];
+
+  // Binary files with a wrong count in the header are common, so trust the file length instead.
+  const count = Math.floor((buffer.byteLength - 84) / 50);
+  const positions = new Float32Array(count * 9);
+  for (let t = 0; t < count; t++) {
+    const o = 84 + t * 50 + 12;
+    for (let k = 0; k < 9; k++) positions[t * 9 + k] = view.getFloat32(o + k * 4, true);
+  }
+  return [stlMesh("body-1", positions)];
+}
+
+function readAsciiStl(text) {
+  const meshes = [];
+  const solid = /solid[ \t]*([^\r\n]*)([\s\S]*?)endsolid/g;
+  const vertex = /vertex\s+(\S+)\s+(\S+)\s+(\S+)/g;
+  for (let m; (m = solid.exec(text)); ) {
+    const coords = [];
+    for (let v; (v = vertex.exec(m[2])); ) coords.push(Number(v[1]), Number(v[2]), Number(v[3]));
+    const usable = coords.length - (coords.length % 9);
+    if (usable && coords.slice(0, usable).every(Number.isFinite)) {
+      meshes.push(stlMesh(m[1].trim() || `body-${meshes.length + 1}`, Float32Array.from(coords.slice(0, usable))));
+    }
+  }
+  return meshes;
+}
+
+function stlMesh(name, positions) {
+  const indices = new Uint32Array(positions.length / 3);
+  for (let i = 0; i < indices.length; i++) indices[i] = i;
+  return { name, positions, indices };
+}
+
+function readCad(lib, format, buffer, quality) {
+  const q = QUALITY[quality] || QUALITY.standard;
+  const params = {
+    linearUnit: "millimeter",
+    linearDeflectionType: "absolute_value",
+    linearDeflection: q.linear,
+    angularDeflection: q.angular,
+  };
+  const bytes = new Uint8Array(buffer);
+  const result = format === "iges" ? lib.ReadIgesFile(bytes, params) : lib.ReadStepFile(bytes, params);
+  if (!result || !result.success) {
+    throw new Error(`This file could not be read. It may be damaged or not a valid ${format.toUpperCase()} file.`);
+  }
+  return result.meshes
+    .filter((m) => m.index && m.index.array.length >= 3)
+    .map((m, i) => ({ name: m.name || `body-${i + 1}`, positions: m.attributes.position.array, indices: m.index.array }));
+}
+
 function safeName(name, fallback) {
   const cleaned = String(name || "").replace(/[\\/:*?"<>|\x00-\x1f]+/g, "_").trim();
   return cleaned || fallback;
@@ -100,28 +157,18 @@ self.onmessage = async (e) => {
 
   const { id, name, format, buffer, quality, splitBodies, fit } = msg;
   try {
-    const lib = await loadOcct();
-    const q = QUALITY[quality] || QUALITY.standard;
-    const params = {
-      linearUnit: "millimeter",
-      linearDeflectionType: "absolute_value",
-      linearDeflection: q.linear,
-      angularDeflection: q.angular,
-    };
-    const bytes = new Uint8Array(buffer);
-    const result = format === "iges" ? lib.ReadIgesFile(bytes, params) : lib.ReadStepFile(bytes, params);
-    if (!result || !result.success) {
-      throw new Error(`This file could not be read. It may be damaged or not a valid ${format.toUpperCase()} file.`);
+    let meshes;
+    if (format === "stl") {
+      meshes = readStl(buffer);
+      if (meshes.length === 0) throw new Error("This file could not be read. It may be damaged or not a valid STL file.");
+    } else {
+      meshes = readCad(await loadOcct(), format, buffer, quality);
+      if (meshes.length === 0) {
+        throw new Error("No solid geometry found. The file may only contain curves or an empty assembly.");
+      }
     }
 
-    const meshes = result.meshes
-      .filter((m) => m.index && m.index.array.length >= 3)
-      .map((m, i) => ({ name: m.name || `body-${i + 1}`, positions: m.attributes.position.array, indices: m.index.array }));
-    if (meshes.length === 0) {
-      throw new Error("No solid geometry found. The file may only contain curves or an empty assembly.");
-    }
-
-    const base = safeName(name.replace(/\.(step|stp|iges|igs)$/i, ""), "model");
+    const base = safeName(name.replace(/\.(step|stp|iges|igs|stl)$/i, ""), "model");
     const outputs = [];
     if (fit) {
       const cut = await cutForPrinter(meshes, base, splitBodies, fit);

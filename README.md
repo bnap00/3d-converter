@@ -45,6 +45,8 @@ names or file contents.
 ## Cut to fit
 
 `assets/cutter.js` splits parts that are bigger than the chosen build volume.
+STL files (binary or ASCII) are accepted too: the worker reads them directly
+without loading OpenCascade, and passes them to the cutter.
 The converter worker loads it only when "Cut to fit my printer" is on. It welds
 each body's mesh, cuts it with an even grid of planes (5 mm brim margin on X
 and Y), caps every cut with a triangulated face so each piece stays closed,
