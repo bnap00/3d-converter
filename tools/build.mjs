@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SITE = "https://3dconverter.bnap.dev";
+const SITE = "https://3d-converter.bnap.dev";
 const today = new Date().toISOString().slice(0, 10);
 
 /* ---------- FAQ content ---------- */

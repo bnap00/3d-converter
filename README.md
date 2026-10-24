@@ -1,7 +1,7 @@
 # 3D Converter
 
 Free, bulk STEP/IGES to STL converter that runs entirely in the browser.
-Live at https://3dconverter.bnap.dev
+Live at https://3d-converter.bnap.dev
 
 Plain HTML, CSS and JavaScript. No framework, and no build step on deploy.
 
