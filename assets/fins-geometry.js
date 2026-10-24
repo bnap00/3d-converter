@@ -47,31 +47,33 @@ export const FIN = {
 
 export function parseStl(buffer) {
   const view = new DataView(buffer);
-  if (buffer.byteLength >= 84) {
-    const n = view.getUint32(80, true);
-    if (84 + n * 50 === buffer.byteLength) {
-      const tris = new Float32Array(n * 9);
-      for (let i = 0, o = 84; i < n; i++, o += 50) {
-        for (let k = 0; k < 9; k++) tris[i * 9 + k] = view.getFloat32(o + 12 + k * 4, true);
-      }
-      return tris;
+  const count = buffer.byteLength >= 84 ? view.getUint32(80, true) : -1;
+  const readBinary = () => {
+    const tris = new Float32Array(count * 9);
+    for (let i = 0, o = 84; i < count; i++, o += 50) {
+      for (let k = 0; k < 9; k++) tris[i * 9 + k] = view.getFloat32(o + 12 + k * 4, true);
     }
-  }
-  // ASCII: every "vertex x y z" line, three per facet.
+    return tris;
+  };
+  if (count >= 0 && 84 + count * 50 === buffer.byteLength) return readBinary();
+  // ASCII: every "vertex x y z" line, three per facet. Some exporters write it in capitals.
   const text = new TextDecoder().decode(buffer);
-  const re = /vertex\s+([-+\d.eE]+)\s+([-+\d.eE]+)\s+([-+\d.eE]+)/g;
+  const re = /vertex\s+([-+\d.eE]+)\s+([-+\d.eE]+)\s+([-+\d.eE]+)/gi;
   const out = [];
   for (let m; (m = re.exec(text)); ) out.push(+m[1], +m[2], +m[3]);
   const n = Math.floor(out.length / 9);
-  if (!n) throw new Error("This STL has no triangles, or it is not a valid STL file.");
-  return new Float32Array(out.slice(0, n * 9));
+  if (n) return new Float32Array(out.slice(0, n * 9));
+  // Binary with padding after the last triangle, which some exporters leave.
+  if (count > 0 && 84 + count * 50 <= buffer.byteLength) return readBinary();
+  throw new Error("This STL has no triangles, or it is not a valid STL file.");
 }
 
 export function writeStl(parts, header = "stabilizer fins") {
   const count = parts.reduce((s, p) => s + p.length / 9, 0);
   const buffer = new ArrayBuffer(84 + count * 50);
   const view = new DataView(buffer);
-  new Uint8Array(buffer, 0, 80).set(new TextEncoder().encode(String(header).slice(0, 80)));
+  // 80 bytes, not 80 characters: a name in another script can take 3 bytes a character.
+  new Uint8Array(buffer, 0, 80).set(new TextEncoder().encode(String(header)).subarray(0, 80));
   view.setUint32(80, count, true);
   let o = 84;
   for (const p of parts) {

@@ -162,6 +162,19 @@ test("rotate, seat, and STL round trip", () => {
   assert.equal(parseStl(new TextEncoder().encode(ascii).buffer).length, 9);
 });
 
+test("STL edge cases: capitals, trailing bytes, long non-Latin names", () => {
+  const upper = "SOLID T\nFACET NORMAL 0 0 1\nOUTER LOOP\nVERTEX 0 0 0\nVERTEX 1 0 0\nVERTEX 0 1 0\nENDLOOP\nENDFACET\nENDSOLID T\n";
+  assert.equal(parseStl(new TextEncoder().encode(upper).buffer).length, 9);
+  const mesh = boxMesh(0, 0, 0, 1, 2, 3);
+  const exact = new Uint8Array(writeStl([mesh]));
+  const padded = new Uint8Array(exact.length + 7);
+  padded.set(exact);
+  assert.deepEqual(Array.from(parseStl(padded.buffer)), Array.from(mesh));
+  const header = new Uint8Array(writeStl([mesh], "部品".repeat(60)), 0, 80);
+  assert.equal(new TextDecoder().decode(header).slice(0, 26), "部品".repeat(13));
+  assert.throws(() => parseStl(new ArrayBuffer(10)), /not a valid STL/);
+});
+
 if (failures) {
   console.log(`\n${failures} failed`);
   process.exit(1);
