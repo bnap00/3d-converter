@@ -275,13 +275,13 @@ function renderRow(item) {
     const parts = [`${size} to ${formatBytes(bytes)}`, plural(tris, "triangle")];
     if (item.outputs.length > 1) parts.push(`${item.outputs.length} STL files`);
     meta.textContent = parts.join(", ");
-    icon.setAttribute("href", "/assets/icons-v1.svg#i-check-circle");
+    icon.setAttribute("href", "/assets/icons-v2.svg#i-check-circle");
   } else if (item.status === "error") {
     meta.textContent = item.error;
-    icon.setAttribute("href", "/assets/icons-v1.svg#i-warning-circle");
+    icon.setAttribute("href", "/assets/icons-v2.svg#i-warning-circle");
   } else {
     meta.textContent = item.status === "converting" ? `${size}, converting` : `${size}, waiting`;
-    icon.setAttribute("href", "/assets/icons-v1.svg#i-cube");
+    icon.setAttribute("href", "/assets/icons-v2.svg#i-cube");
   }
 
   const done = item.status === "done";
