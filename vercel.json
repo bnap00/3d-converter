@@ -40,7 +40,7 @@
       ]
     },
     {
-      "source": "/(favicon.svg|favicon.ico|apple-touch-icon.png|icon-192.png|icon-512.png|og-image.png|og-stp-to-stl.png|og-iges-to-stl.png|site.webmanifest|robots.txt|sitemap.xml)",
+      "source": "/(favicon.svg|favicon.ico|apple-touch-icon.png|icon-192.png|icon-512.png|og-image.png|og-stp-to-stl.png|og-iges-to-stl.png|og-stabilizer-fins.png|site.webmanifest|robots.txt|sitemap.xml)",
       "headers": [
         {
           "key": "Cache-Control",

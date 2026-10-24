@@ -1,4 +1,5 @@
-// Builds the static landing pages from templates/page.html.
+// Builds the static pages from templates/page.html (the converters) and templates/fins.html
+// (the stabilizer fins tool). Both pull in the shared templates/_*.html partials.
 // No dependencies. Run after editing the template or the page content below:
 //   node tools/build.mjs
 // The generated .html files are committed and deployed as-is (Vercel needs no build step).
@@ -66,6 +67,38 @@ const faq = {
     q: "Is it really free?",
     a: "Yes. No account, no watermark and no limit on the number of files.",
   },
+  finsWhat: {
+    q: "What are stabilizer fins?",
+    a: "Thin vertical plates printed next to a tall, narrow part, joined to it by tiny one-layer bridges called tines. They widen the base so the part cannot be knocked over by the nozzle or the bed moving, and they snap off cleanly once the print is done.",
+  },
+  finsWhy: {
+    q: "Why not use a brim or slicer supports?",
+    a: "A brim only helps the first layer stick. It does nothing once the part is 50 mm tall and the nozzle catches the top. Slicer supports sit under overhangs and do not touch the sides of a part. Fins tie the sides to a wide footprint all the way up, and because they are part of the STL they work in any slicer.",
+  },
+  finsRemove: {
+    q: "How do I remove the fins?",
+    a: "Bend each fin away from the part. The tines are one layer tall and only bridge a 0.2 mm gap, so they break at the part's surface and leave small marks. A flush cutter or a light sand cleans up what is left.",
+  },
+  finsLayer: {
+    q: "Why does the tine height need to match my layer height?",
+    a: "A tine is meant to print as a single line. If it is taller or shorter than one layer, the slicer splits it across two layers or drops it, and it stops holding the part. Set Layer height to the value in your slicer before you download.",
+  },
+  finsSlicer: {
+    q: "Which slicers work with the result?",
+    a: "Any slicer that opens STL: Cura, PrusaSlicer, Bambu Studio, OrcaSlicer and others. The fins are separate closed shells in the same STL, and the slicer merges them with the part. Do not split the STL into objects, or the tines will no longer touch the part.",
+  },
+  finsFiles: {
+    q: "Which files can I add fins to?",
+    a: 'STL, STEP and IGES. STEP and IGES files are converted to a mesh in your browser first, the same way as on the <a href="/">STEP to STL converter</a>. Nothing is uploaded.',
+  },
+  finsIdea: {
+    q: "Where does the idea come from?",
+    a: 'Designed-in support fins were popularised by Slant3D, and <a href="https://printfins.com" rel="noopener">Support Fins</a> builds them under overhangs. This tool uses the same breakaway gap and one-layer tines, but stands the fins beside a tall part to stop it tipping over.',
+  },
+  finsPlace: {
+    q: "Can I choose where the fins go?",
+    a: "Yes. The tool suggests fins on both thin sides of the part, but you can drag each one along the part, change its height, delete it, or click anywhere on the part to add another.",
+  },
 };
 
 /* ---------- Pages ---------- */
@@ -131,6 +164,46 @@ const pages = [
     faqTitle: "IGES to STL questions",
     faq: ["igesWhat", "igesGaps", "igesVsStep", "uploaded", "units", "quality", "bodies", "size", "free"],
   },
+  {
+    file: "stabilizer-fins.html",
+    template: "fins.html",
+    path: "/stabilizer-fins",
+    nav: "Stabilizer fins",
+    group: "tools",
+    title: "Stabilizer Fins for Tall, Thin 3D Prints: Free, No Upload | 3D Converter",
+    description: "Stop tall, thin 3D prints from getting knocked over. Add breakaway stabilizer fins to both sides of an STL, STEP or IGES part, right in your browser.",
+    ogTitle: "Stabilizer Fins for Tall, Thin Prints",
+    ogDescription: "Add breakaway fins to both sides of a tall, thin part so it cannot tip over mid-print. Free, in your browser.",
+    ogImage: "og-stabilizer-fins.png",
+    ogImageAlt: "3D Converter: a tall, thin part with stabilizer fins on both sides, in the fins editor",
+    appName: "3D Converter: Stabilizer fins",
+    appScript: "/assets/fins-app.js",
+    skip: ["#fins-tool", "Skip to the fins tool"],
+    navLinks: [["#fins-tool", "Tool"], ["#how-it-works", "How it works"], ["#faq", "FAQ"]],
+    eyebrow: "Free, no sign-up",
+    h1: "Stabilizer fins for tall, thin prints",
+    lede: "Tall, narrow parts get knocked over halfway through a print. Add breakaway fins to both sides, tied on with one-layer tines, and download one STL that prints in any slicer.",
+    faqTitle: "Stabilizer fin questions",
+    faq: ["finsWhat", "finsWhy", "finsRemove", "finsLayer", "finsPlace", "finsSlicer", "finsFiles", "finsIdea", "uploaded", "free"],
+    featureList: [
+      "Add stabilizer fins to STL, STEP and IGES parts",
+      "Suggests fins on both thin sides of tall parts",
+      "Drag, resize, add and delete fins by hand",
+      "One-layer breakaway tines that grip the part",
+      "Runs locally in the browser, no upload",
+      "Download one STL with the fins included",
+    ],
+  },
+];
+
+const converterFeatures = [
+  "Convert STEP (.step, .stp) to STL",
+  "Convert IGES (.iges, .igs) to STL",
+  "Bulk conversion with ZIP download",
+  "Runs locally in the browser, no upload",
+  "Draft, Standard and Fine mesh quality",
+  "One STL per body for assemblies",
+  "3D preview of the result",
 ];
 
 /* ---------- Rendering ---------- */
@@ -139,17 +212,22 @@ const escapeAttr = (s) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").repla
 const stripTags = (s) => s.replace(/<[^>]+>/g, "");
 const urlOf = (p) => SITE + p.path;
 
-const caret = '<svg class="icon" aria-hidden="true"><use href="/assets/icons-v1.svg#i-caret-down"/></svg>';
+const caret = '<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg>';
 const renderFaq = (keys) =>
   keys
     .map((k) => `        <details>\n          <summary>${faq[k].q}${caret}</summary>\n          <p>${faq[k].a}</p>\n        </details>\n`)
     .join("");
 
+const relatedGroup = (label, list, current) =>
+  `<span class="related-label">${label}</span>` +
+  list.map((p) => `<a href="${p.path}"${p === current ? ' aria-current="page"' : ""}>${p.nav}</a>`).join(" ");
 const renderRelated = (current) =>
-  '<span class="related-label">Converters</span>' +
-  pages
-    .map((p) => `<a href="${p.path}"${p === current ? ' aria-current="page"' : ""}>${p.nav}</a>`)
-    .join(" ");
+  relatedGroup("Converters", pages.filter((p) => !p.group), current) +
+  ' <span class="related-sep" aria-hidden="true"></span>' +
+  relatedGroup("Tools", pages.filter((p) => p.group === "tools"), current);
+
+const defaultNav = [["#features", "Features"], ["#how-it-works", "How it works"], ["#faq", "FAQ"]];
+const renderNav = (links) => links.map(([href, label]) => `        <a href="${href}">${label}</a>\n`).join("");
 
 function jsonld(page) {
   const url = urlOf(page);
@@ -176,15 +254,7 @@ function jsonld(page) {
       screenshot: `${SITE}/${page.ogImage}`,
       isAccessibleForFree: true,
       inLanguage: "en",
-      featureList: [
-        "Convert STEP (.step, .stp) to STL",
-        "Convert IGES (.iges, .igs) to STL",
-        "Bulk conversion with ZIP download",
-        "Runs locally in the browser, no upload",
-        "Draft, Standard and Fine mesh quality",
-        "One STL per body for assemblies",
-        "3D preview of the result",
-      ],
+      featureList: page.featureList || converterFeatures,
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       creator: { "@id": "https://bnap.dev/#org" },
     },
@@ -211,9 +281,14 @@ function jsonld(page) {
   return JSON.stringify({ "@context": "https://schema.org", "@graph": graph }, null, 2).replace(/</g, "\\u003c");
 }
 
-const template = readFileSync(join(root, "templates/page.html"), "utf8");
+const read = (name) => readFileSync(join(root, "templates", name), "utf8");
+const partials = { head: read("_head.html"), header: read("_header.html"), footer: read("_footer.html") };
 
 for (const page of pages) {
+  const template = read(page.template || "page.html").replace(/{{>(\w+)}}\n?/g, (_, name) => {
+    if (!(name in partials)) throw new Error(`Missing partial {{>${name}}} in ${page.file}`);
+    return partials[name];
+  });
   const values = {
     title: escapeAttr(page.title),
     description: escapeAttr(page.description),
@@ -221,15 +296,17 @@ for (const page of pages) {
     ogTitle: escapeAttr(page.ogTitle),
     ogDescription: escapeAttr(page.ogDescription),
     ogImage: `${SITE}/${page.ogImage}`,
-    ogImageAlt: escapeAttr(`3D Converter: bulk ${page.nav} converter, with a converted CAD assembly shown in 3D`),
+    ogImageAlt: escapeAttr(page.ogImageAlt || `3D Converter: bulk ${page.nav} converter, with a converted CAD assembly shown in 3D`),
+    appScript: page.appScript || "/assets/app.js",
+    skipHref: (page.skip || ["#converter"])[0],
+    skipLabel: (page.skip || [, "Skip to converter"])[1],
+    navLinks: renderNav(page.navLinks || defaultNav),
     jsonld: jsonld(page),
     eyebrow: page.eyebrow,
     h1: page.h1,
     lede: page.lede,
     dropTitle: page.dropTitle,
-    howtoTitle: page.howtoTitle,
-    howtoIntro: page.howtoIntro,
-    howtoAdd: page.howtoAdd,
+    ...(page.howtoTitle && { howtoTitle: page.howtoTitle, howtoIntro: page.howtoIntro, howtoAdd: page.howtoAdd }),
     faqTitle: page.faqTitle,
     faq: renderFaq(page.faq),
     related: renderRelated(page),
@@ -240,7 +317,7 @@ for (const page of pages) {
   });
   html = html.replace(
     "<!doctype html>\n",
-    "<!doctype html>\n<!-- Generated from templates/page.html by tools/build.mjs. Edit those, then run: node tools/build.mjs -->\n"
+    `<!doctype html>\n<!-- Generated from templates/${page.template || "page.html"} by tools/build.mjs. Edit those, then run: node tools/build.mjs -->\n`
   );
   writeFileSync(join(root, page.file), html);
   console.log("wrote", page.file);

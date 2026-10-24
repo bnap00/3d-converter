@@ -1,0 +1,472 @@
+
+<!doctype html>
+<!-- Generated from templates/fins.html by tools/build.mjs. Edit those, then run: node tools/build.mjs -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stabilizer Fins for Tall, Thin 3D Prints: Free, No Upload | 3D Converter</title>
+  <meta name="description" content="Stop tall, thin 3D prints from getting knocked over. Add breakaway stabilizer fins to both sides of an STL, STEP or IGES part, right in your browser.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://3d-converter.bnap.dev/stabilizer-fins">
+  <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c0c0e" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="author" content="bnap.dev">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="3D Converter">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://3d-converter.bnap.dev/stabilizer-fins">
+  <meta property="og:title" content="Stabilizer Fins for Tall, Thin Prints">
+  <meta property="og:description" content="Add breakaway fins to both sides of a tall, thin part so it cannot tip over mid-print. Free, in your browser.">
+  <meta property="og:image" content="https://3d-converter.bnap.dev/og-stabilizer-fins.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="3D Converter: a tall, thin part with stabilizer fins on both sides, in the fins editor">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Stabilizer Fins for Tall, Thin Prints">
+  <meta name="twitter:description" content="Add breakaway fins to both sides of a tall, thin part so it cannot tip over mid-print. Free, in your browser.">
+  <meta name="twitter:image" content="https://3d-converter.bnap.dev/og-stabilizer-fins.png">
+  <meta name="twitter:image:alt" content="3D Converter: a tall, thin part with stabilizer fins on both sides, in the fins editor">
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="preload" href="/fonts/geist-latin-wght-v5.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/styles.css">
+
+  <script type="importmap">
+    { "imports": { "three": "/vendor/three@0.186.0/three.module.js" } }
+  </script>
+  <script type="module" src="/assets/fins-app.js"></script>
+
+  <script src="https://r.bnap.dev/api/script.js" data-site-id="ef6d905b052a" defer></script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://3d-converter.bnap.dev/#website",
+      "url": "https://3d-converter.bnap.dev/",
+      "name": "3D Converter",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://bnap.dev/#org"
+      }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://bnap.dev/#org",
+      "name": "bnap.dev",
+      "url": "https://bnap.dev"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://3d-converter.bnap.dev/stabilizer-fins#app",
+      "name": "3D Converter: Stabilizer fins",
+      "url": "https://3d-converter.bnap.dev/stabilizer-fins",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript and WebAssembly",
+      "description": "Stop tall, thin 3D prints from getting knocked over. Add breakaway stabilizer fins to both sides of an STL, STEP or IGES part, right in your browser.",
+      "image": "https://3d-converter.bnap.dev/og-stabilizer-fins.png",
+      "screenshot": "https://3d-converter.bnap.dev/og-stabilizer-fins.png",
+      "isAccessibleForFree": true,
+      "inLanguage": "en",
+      "featureList": [
+        "Add stabilizer fins to STL, STEP and IGES parts",
+        "Suggests fins on both thin sides of tall parts",
+        "Drag, resize, add and delete fins by hand",
+        "One-layer breakaway tines that grip the part",
+        "Runs locally in the browser, no upload",
+        "Download one STL with the fins included"
+      ],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@id": "https://bnap.dev/#org"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://3d-converter.bnap.dev/stabilizer-fins#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What are stabilizer fins?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Thin vertical plates printed next to a tall, narrow part, joined to it by tiny one-layer bridges called tines. They widen the base so the part cannot be knocked over by the nozzle or the bed moving, and they snap off cleanly once the print is done."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why not use a brim or slicer supports?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A brim only helps the first layer stick. It does nothing once the part is 50 mm tall and the nozzle catches the top. Slicer supports sit under overhangs and do not touch the sides of a part. Fins tie the sides to a wide footprint all the way up, and because they are part of the STL they work in any slicer."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I remove the fins?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Bend each fin away from the part. The tines are one layer tall and only bridge a 0.2 mm gap, so they break at the part's surface and leave small marks. A flush cutter or a light sand cleans up what is left."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does the tine height need to match my layer height?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A tine is meant to print as a single line. If it is taller or shorter than one layer, the slicer splits it across two layers or drops it, and it stops holding the part. Set Layer height to the value in your slicer before you download."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I choose where the fins go?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The tool suggests fins on both thin sides of the part, but you can drag each one along the part, change its height, delete it, or click anywhere on the part to add another."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which slicers work with the result?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Any slicer that opens STL: Cura, PrusaSlicer, Bambu Studio, OrcaSlicer and others. The fins are separate closed shells in the same STL, and the slicer merges them with the part. Do not split the STL into objects, or the tines will no longer touch the part."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which files can I add fins to?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "STL, STEP and IGES. STEP and IGES files are converted to a mesh in your browser first, the same way as on the STEP to STL converter. Nothing is uploaded."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where does the idea come from?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Designed-in support fins were popularised by Slant3D, and Support Fins builds them under overhangs. This tool uses the same breakaway gap and one-layer tines, but stands the fins beside a tall part to stop it tipping over."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are my files uploaded anywhere?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Your CAD files are read from your disk, converted in your browser's memory and saved straight back to your disk. Nothing is sent to a server."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. No account, no watermark and no limit on the number of files."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "3D Converter",
+          "item": "https://3d-converter.bnap.dev/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Stabilizer fins",
+          "item": "https://3d-converter.bnap.dev/stabilizer-fins"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#fins-tool">Skip to the fins tool</a>
+
+  <section class="topbar" aria-labelledby="quote-title">
+    <div class="wrap topbar-inner">
+      <svg class="icon topbar-icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-printer"/></svg>
+      <h2 id="quote-title">No printer? Get it printed.</h2>
+      <p>Upload your STL to Mold and Matter for an instant quote, then get the print delivered to your doorstep.</p>
+      <a class="btn btn-inverse btn-sm" href="https://mnm3d.com/products/custom-3d-print?utm_source=3d-converter.bnap.dev&amp;utm_medium=referral&amp;utm_campaign=banner" target="_blank" rel="noopener">
+        Get instant quote<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-arrow-up-right"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="wordmark" href="/" aria-label="3D Converter home">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-cube"/></svg>
+        <span>3D Converter</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#fins-tool">Tool</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap fins-hero">
+      <p class="eyebrow">Free, no sign-up</p>
+      <h1>Stabilizer fins for tall, thin prints</h1>
+      <p class="lede">Tall, narrow parts get knocked over halfway through a print. Add breakaway fins to both sides, tied on with one-layer tines, and download one STL that prints in any slicer.</p>
+    </section>
+
+    <section class="wrap" id="fins-tool" aria-label="Stabilizer fins tool">
+      <div class="fins-tool" id="fins-tool-card" data-state="empty">
+        <div class="fins-stage" id="fins-stage">
+          <label class="dropzone fins-drop" id="fins-drop" for="fins-input">
+            <svg class="icon dz-icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-file-arrow-up"/></svg>
+            <span class="dz-title">Drop a tall, thin part here</span>
+            <span class="dz-help">.stl, .step, .stp, .iges or .igs. One part at a time.</span>
+            <span class="btn btn-primary dz-button">Choose a file</span>
+            <input id="fins-input" type="file" accept=".stl,.step,.stp,.iges,.igs" class="visually-hidden">
+          </label>
+          <div class="fins-loading" id="fins-loading" hidden>
+            <span class="shimmer" aria-hidden="true"></span>
+            <span id="fins-loading-text">Reading the part</span>
+          </div>
+          <div class="fins-toolbar" id="fins-toolbar" hidden>
+            <div class="fins-turn" role="group" aria-label="Turn the part">
+              <span class="fins-turn-label">Turn</span>
+              <button type="button" class="btn btn-ghost btn-sm" data-turn="x" title="Turn a quarter around X">X</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-turn="y" title="Turn a quarter around Y">Y</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-turn="z" title="Turn a quarter around Z">Z</button>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" id="add-fin" aria-pressed="false">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-plus"/></svg>Add fin
+            </button>
+          </div>
+          <p class="fins-help" id="fins-help" hidden>Drag to orbit, scroll to zoom, right-drag to pan. Click a fin to edit it.</p>
+        </div>
+
+        <aside class="fins-panel" id="fins-panel" aria-label="Part and fins" hidden>
+          <div class="panel-sec panel-file">
+            <p class="panel-name" id="part-name"></p>
+            <label class="btn btn-ghost btn-sm" for="fins-input">Replace</label>
+          </div>
+
+          <div class="panel-sec">
+            <dl class="stability" id="stability">
+              <div><dt>Height</dt><dd id="st-height"></dd></div>
+              <div><dt>Base width</dt><dd id="st-base"></dd></div>
+              <div><dt>Height to base</dt><dd id="st-ratio"></dd></div>
+            </dl>
+            <p class="risk" id="st-risk" data-risk="low"></p>
+          </div>
+
+          <div class="panel-sec">
+            <div class="panel-row">
+              <h2 class="panel-title">Fins <span id="fin-count"></span></h2>
+              <button type="button" class="btn btn-ghost btn-sm" id="suggest-fins">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-arrow-clockwise"/></svg>Suggest again
+              </button>
+            </div>
+            <ul class="fin-list" id="fin-list"></ul>
+            <p class="hint" id="fins-empty">No fins yet. Use Add fin, then click the side of the part.</p>
+          </div>
+
+          <div class="panel-sec fin-edit" id="fin-edit" hidden>
+            <div class="panel-row">
+              <h2 class="panel-title" id="fin-edit-title">Fin</h2>
+              <button type="button" class="icon-btn" id="fin-delete" title="Delete fin" aria-label="Delete fin">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-trash"/></svg>
+              </button>
+            </div>
+            <label class="range">
+              <span>Position <output id="fin-pos-out"></output></span>
+              <input type="range" id="fin-pos" step="0.5">
+            </label>
+            <label class="range">
+              <span>Height <output id="fin-h-out"></output></span>
+              <input type="range" id="fin-h" step="0.5">
+            </label>
+          </div>
+
+          <details class="panel-sec fin-settings">
+            <summary>Fin settings<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+            <label class="range">
+              <span>Height <output id="set-heightPct-out"></output></span>
+              <input type="range" id="set-heightPct" data-setting="heightPct" min="20" max="100" step="5" value="60">
+              <small>Of the part height, for every fin you have not resized</small>
+            </label>
+            <label class="range">
+              <span>Depth at the bed <output id="set-depthPct-out"></output></span>
+              <input type="range" id="set-depthPct" data-setting="depthPct" min="15" max="80" step="5" value="35">
+              <small>How far the fin reaches out, as a share of its height</small>
+            </label>
+            <label class="range">
+              <span>Thickness <output id="set-thickness-out"></output></span>
+              <input type="range" id="set-thickness" data-setting="thickness" min="0.8" max="2.4" step="0.4" value="1.2">
+            </label>
+            <label class="range">
+              <span>Gap to the part <output id="set-gap-out"></output></span>
+              <input type="range" id="set-gap" data-setting="gap" min="0.1" max="0.5" step="0.05" value="0.2">
+            </label>
+            <label class="range">
+              <span>Layer height <output id="set-layerH-out"></output></span>
+              <input type="range" id="set-layerH" data-setting="layerH" min="0.08" max="0.32" step="0.04" value="0.2">
+              <small>Match your slicer, so each tine prints as one line</small>
+            </label>
+            <label class="range">
+              <span>Tine spacing <output id="set-tineSpacing-out"></output></span>
+              <input type="range" id="set-tineSpacing" data-setting="tineSpacing" min="2" max="15" step="1" value="5">
+            </label>
+          </details>
+
+          <div class="panel-foot">
+            <p class="notice" id="fins-notice" role="status" hidden></p>
+            <button type="button" class="btn btn-primary" id="download-fins">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-download-simple"/></svg>Download STL with fins
+            </button>
+            <p class="ready-to-print">
+              No printer?
+              <a href="https://mnm3d.com/products/custom-3d-print?utm_source=3d-converter.bnap.dev&amp;utm_medium=referral&amp;utm_campaign=fins" target="_blank" rel="noopener">Get instant quote<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-arrow-up-right"/></svg></a>
+            </p>
+          </div>
+        </aside>
+        <noscript><p class="notice">The fins tool needs JavaScript. Please enable it to add fins.</p></noscript>
+      </div>
+    </section>
+
+    <section class="wrap howto" id="how-it-works" aria-labelledby="howto-title">
+      <div class="howto-head reveal">
+        <h2 id="howto-title">How stabilizer fins work</h2>
+        <p class="howto-intro">A part that is tall and narrow has a small footprint and a long lever. Every time the nozzle drags across the top, or a bed slinger jerks back and forth, it pushes the part over a little more until it lets go of the bed. Fins give it a wide stance on both sides without changing the part itself.</p>
+      </div>
+      <figure class="fins-diagram reveal" aria-labelledby="fins-diagram-caption">
+        <svg viewBox="0 0 640 260" role="img" aria-labelledby="fins-diagram-caption">
+          <line class="dg-bed" x1="40" y1="220" x2="600" y2="220"/>
+          <rect class="dg-part" x="306" y="30" width="28" height="190" rx="2"/>
+          <path class="dg-fin" d="M300 220 V90 H292 L212 220 Z"/>
+          <path class="dg-fin" d="M340 220 V90 H348 L428 220 Z"/>
+          <rect class="dg-foot" x="196" y="216" width="104" height="4"/>
+          <rect class="dg-foot" x="340" y="216" width="104" height="4"/>
+          <g class="dg-tines">
+            <rect x="300" y="200" width="7" height="2"/><rect x="300" y="170" width="7" height="2"/><rect x="300" y="140" width="7" height="2"/><rect x="300" y="110" width="7" height="2"/>
+            <rect x="333" y="200" width="7" height="2"/><rect x="333" y="170" width="7" height="2"/><rect x="333" y="140" width="7" height="2"/><rect x="333" y="110" width="7" height="2"/>
+          </g>
+          <g class="dg-labels">
+            <text x="320" y="20" text-anchor="middle">Your part</text>
+            <text x="190" y="120" text-anchor="end">Fin</text>
+            <line x1="196" y1="116" x2="256" y2="150"/>
+            <text x="470" y="130">Tines: one layer,</text>
+            <text x="470" y="148">bridge a 0.2 mm gap</text>
+            <line x1="466" y1="136" x2="342" y2="141"/>
+            <text x="470" y="210">Foot and pad</text>
+            <line x1="466" y1="206" x2="430" y2="216"/>
+          </g>
+        </svg>
+        <figcaption id="fins-diagram-caption">Seen end-on: a fin on each side of a thin part, joined to it by tines.</figcaption>
+      </figure>
+      <ol class="howto-list">
+        <li class="reveal">
+          <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-file-arrow-up"/></svg></span>
+          <h3>Add your part</h3>
+          <p>Drop an STL, STEP or IGES file. Turn it until it stands the way you will print it. The tool shows how tall it is compared to its base.</p>
+        </li>
+        <li class="reveal">
+          <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-sliders-horizontal"/></svg></span>
+          <h3>Check the fins</h3>
+          <p>Fins are suggested on both thin sides. Move or resize any of them, delete the ones you do not need, or click the part to add more.</p>
+        </li>
+        <li class="reveal">
+          <span class="step-icon"><svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-download-simple"/></svg></span>
+          <h3>Print, then snap them off</h3>
+          <p>Download one STL with the fins included and slice it as usual. When the print is done, bend each fin away from the part to break the tines.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="wrap faq" id="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Stabilizer fin questions</h2>
+      <div class="faq-list">
+        <details>
+          <summary>What are stabilizer fins?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>Thin vertical plates printed next to a tall, narrow part, joined to it by tiny one-layer bridges called tines. They widen the base so the part cannot be knocked over by the nozzle or the bed moving, and they snap off cleanly once the print is done.</p>
+        </details>
+        <details>
+          <summary>Why not use a brim or slicer supports?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>A brim only helps the first layer stick. It does nothing once the part is 50 mm tall and the nozzle catches the top. Slicer supports sit under overhangs and do not touch the sides of a part. Fins tie the sides to a wide footprint all the way up, and because they are part of the STL they work in any slicer.</p>
+        </details>
+        <details>
+          <summary>How do I remove the fins?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>Bend each fin away from the part. The tines are one layer tall and only bridge a 0.2 mm gap, so they break at the part's surface and leave small marks. A flush cutter or a light sand cleans up what is left.</p>
+        </details>
+        <details>
+          <summary>Why does the tine height need to match my layer height?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>A tine is meant to print as a single line. If it is taller or shorter than one layer, the slicer splits it across two layers or drops it, and it stops holding the part. Set Layer height to the value in your slicer before you download.</p>
+        </details>
+        <details>
+          <summary>Can I choose where the fins go?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>Yes. The tool suggests fins on both thin sides of the part, but you can drag each one along the part, change its height, delete it, or click anywhere on the part to add another.</p>
+        </details>
+        <details>
+          <summary>Which slicers work with the result?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>Any slicer that opens STL: Cura, PrusaSlicer, Bambu Studio, OrcaSlicer and others. The fins are separate closed shells in the same STL, and the slicer merges them with the part. Do not split the STL into objects, or the tines will no longer touch the part.</p>
+        </details>
+        <details>
+          <summary>Which files can I add fins to?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>STL, STEP and IGES. STEP and IGES files are converted to a mesh in your browser first, the same way as on the <a href="/">STEP to STL converter</a>. Nothing is uploaded.</p>
+        </details>
+        <details>
+          <summary>Where does the idea come from?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>Designed-in support fins were popularised by Slant3D, and <a href="https://printfins.com" rel="noopener">Support Fins</a> builds them under overhangs. This tool uses the same breakaway gap and one-layer tines, but stands the fins beside a tall part to stop it tipping over.</p>
+        </details>
+        <details>
+          <summary>Are my files uploaded anywhere?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>No. Your CAD files are read from your disk, converted in your browser's memory and saved straight back to your disk. Nothing is sent to a server.</p>
+        </details>
+        <details>
+          <summary>Is it really free?<svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-caret-down"/></svg></summary>
+          <p>Yes. No account, no watermark and no limit on the number of files.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="footer-top">
+        <a class="wordmark" href="/" aria-label="3D Converter home">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons-v2.svg#i-cube"/></svg>
+          <span>3D Converter</span>
+        </a>
+        <nav class="related" aria-label="Converters and tools"><span class="related-label">Converters</span><a href="/">STEP to STL</a> <a href="/stp-to-stl">STP to STL</a> <a href="/iges-to-stl">IGES to STL</a> <span class="related-sep" aria-hidden="true"></span><span class="related-label">Tools</span><a href="/stabilizer-fins" aria-current="page">Stabilizer fins</a></nav>
+      </div>
+      <div class="footer-bottom">
+        <p class="made-with">
+          Made with
+          <svg class="icon heart" role="img" aria-label="love"><use href="/assets/icons-v2.svg#i-heart"/></svg>
+          by <a href="https://bnap.dev">bnap.dev</a>
+        </p>
+        <p class="credits">CAD import by <a href="https://github.com/kovacsv/occt-import-js" rel="noopener">occt-import-js</a> and OpenCascade (LGPL-2.1). Icons by <a href="https://phosphoricons.com" rel="noopener">Phosphor</a>.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
