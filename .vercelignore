@@ -4,3 +4,6 @@ skills-lock.json
 README.md
 templates
 tools
+.github
+.pre-commit-config.yaml
+SECURITY.md

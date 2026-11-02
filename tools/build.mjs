@@ -5,6 +5,7 @@
 // The generated .html files are committed and deployed as-is (Vercel needs no build step).
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -283,6 +284,9 @@ function jsonld(page) {
 
 const read = (name) => readFileSync(join(root, "templates", name), "utf8");
 const partials = { head: read("_head.html"), header: read("_header.html"), footer: read("_footer.html") };
+// The CSP allows the inline import map by hash, so it has to match the map's exact text.
+const importmap = partials.head.match(/<script type="importmap">([\s\S]*?)<\/script>/)[1];
+const importmapHash = `'sha256-${createHash("sha256").update(importmap).digest("base64")}'`;
 
 for (const page of pages) {
   const template = read(page.template || "page.html").replace(/{{>(\w+)}}\n?/g, (_, name) => {
@@ -297,6 +301,7 @@ for (const page of pages) {
     ogDescription: escapeAttr(page.ogDescription),
     ogImage: `${SITE}/${page.ogImage}`,
     ogImageAlt: escapeAttr(page.ogImageAlt || `3D Converter: bulk ${page.nav} converter, with a converted CAD assembly shown in 3D`),
+    importmapHash,
     appScript: page.appScript || "/assets/app.js",
     skipHref: (page.skip || ["#converter"])[0],
     skipLabel: (page.skip || [, "Skip to converter"])[1],
