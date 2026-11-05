@@ -93,6 +93,12 @@ upgrade a library, put it in a new versioned folder (e.g. `three@0.187.0/`) and
 update the paths. The icon sprite is cached forever too: to add an icon, copy
 it to the next version (`icons-v3.svg`) and update the references.
 
+Each page sets a Content-Security-Policy meta tag (in `templates/_head.html`,
+and by hand in `404.html`). It allows only this site and `r.bnap.dev`
+(analytics). `tools/build.mjs` fills in the hash of the inline import map, so
+rebuild after editing it. Loading anything from a new origin means adding it to
+the policy.
+
 ## Credits
 
 STEP/IGES import: occt-import-js and OpenCascade (LGPL-2.1). three.js (MIT),
